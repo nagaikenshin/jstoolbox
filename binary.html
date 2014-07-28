@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" >
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="keywords" content="Javascript,バイナリ,変換,2進数,8進数,16進数,ビッグエンディアン,リトルエンディアン" />
+  <title>Javascript道具箱 バイナリ編</title>
+  <script type="text/javascript">
+  //<![CDATA[
+    function change(kind) {
+      var lenBin = parseInt(document.f.intLen.value) * 8;
+      var tgtVal = 0;
+      var tgtValR = 0;
+      var ch = 0;
+      var idx = 0;
+      var fldVal = eval("document.f.int" + kind + ".value");
+      var fldElm = null;
+      var nrAry = new Array("", "R");
+      var nrIdx = 0;
+
+      switch (kind) {
+      case "Bin":
+      case "BinR":
+        tgtVal = parseInt(fldVal, 2);
+        break;
+      case "Oct":
+      case "OctR":
+        tgtVal = parseInt(fldVal, 8);
+        break;
+      case "Hex":
+      case "HexR":
+        tgtVal = parseInt(fldVal, 16);
+        break;
+      case "Asc":
+      case "AscR":
+        tgtVal = 0;
+        for(idx = 0; idx < fldVal.length; idx++) {
+          ch = fldVal.charAt(idx);
+          tgtVal = tgtVal * 256 + ch.charCodeAt(0);
+        }
+        break;
+      case "Uni":
+      case "UniR":
+        tgtVal = 0;
+//        alert(fldVal.length);
+        for(idx = 0; idx < fldVal.length; idx++) {
+          ch = fldVal.charAt(idx);
+          tgtVal = tgtVal * 65536 + ch.charCodeAt(0);
+        }
+        break;
+      default:
+        tgtVal = parseInt(fldVal);
+        break;
+      }
+
+      if(4 == kind.length) {
+        nrAry = new Array("R", "");
+      }
+
+      var strFrom = "";
+      var strTo = "";
+      var strBuf = "";
+      eval("document.f.intBin" + nrAry[0]).value = parseInt(tgtVal).toString(2);
+      strFrom = "";
+      for(idx = 0; idx < 48; idx++) {
+        strFrom += "0";
+      }
+      strFrom = strFrom + eval("document.f.intBin" + nrAry[0] + ".value");
+      if(32 == lenBin) {
+        strFrom = strFrom.substring(strFrom.length - 32, strFrom.length);
+      } else {
+        strFrom = strFrom.substring(strFrom.length - 48, strFrom.length);
+      }
+      strTo = "";
+      while(strFrom.length > 0) {
+        strBuf = strFrom.substring(0, lenBin);
+        if(parseInt(strBuf) != 0) {
+          while(strBuf.length > 0) {
+            strTo = strTo + strBuf.substring(strBuf.length - 8, strBuf.length);
+            strBuf = strBuf.substring(0, strBuf.length - 8);
+          }
+        }
+        strFrom = strFrom.substring(lenBin, strFrom.length);
+      }
+      tgtValR = parseInt(strTo, 2);
+      eval("document.f.intBin" + nrAry[1]).value = tgtValR.toString(2);
+
+      var tmpTgtVal = 0;
+      var tgtAry = new Array(tgtVal, tgtValR);
+      for(nrIdx = 0; nrIdx < 2; nrIdx++) {
+        eval("document.f.intOct" + nrAry[nrIdx]).value = tgtAry[nrIdx].toString(8);
+        eval("document.f.intDec" + nrAry[nrIdx]).value = tgtAry[nrIdx];
+        eval("document.f.intHex" + nrAry[nrIdx]).value = tgtAry[nrIdx].toString(16);
+        fldElm = eval("document.f.intAsc" + nrAry[nrIdx]);
+        fldElm.value = "";
+        tmpTgtVal = tgtAry[nrIdx];
+        while(tmpTgtVal != 0) {
+          ch = String.fromCharCode(tmpTgtVal % 256);
+          fldElm.value = ch + fldElm.value;
+          tmpTgtVal = parseInt("" + (tmpTgtVal / 256));
+        }
+        fldElm = eval("document.f.intUni" + nrAry[nrIdx]);
+        fldElm.value = "";
+        tmpTgtVal = tgtAry[nrIdx];
+        while(tmpTgtVal != 0) {
+          ch = String.fromCharCode(tmpTgtVal % 65536);
+          fldElm.value = ch + fldElm.value;
+          tmpTgtVal = parseInt("" + (tmpTgtVal / 65536));
+        }
+      }
+    }
+  //]]>
+  </script>
+</head>
+<body style="font-size:12pt;">
+  <form name="f">
+    <table>
+      <tr>
+        <td></td>
+        <td>
+          バイト長 <select name="intLen">
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="6">6</option>
+          </select>
+        </td>
+        <td>エンディアン反転</td>
+      </tr>
+      <tr>
+        <td>2進数</td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intBin" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('Bin');" /></td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intBinR" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('BinR');" /></td>
+      </tr>
+      <tr>
+        <td>8進数</td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intOct" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('Oct');" /></td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intOctR" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('OctR');" /></td>
+      </tr>
+      <tr>
+        <td>10進数</td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intDec" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('Dec');" /></td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intDecR" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('DecR');" /></td>
+      </tr>
+      <tr>
+        <td>16進数</td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intHex" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('Hex');" /></td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intHexR" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('HexR');" /></td>
+      </tr>
+      <tr>
+        <td>ASCII</td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intAsc" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('Asc');" /></td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intAscR" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('AscR');" /></td>
+      </tr>
+      <tr>
+        <td>UNICODE</td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intUni" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('Uni');" /></td>
+        <td><input style="font-size:14pt;font-family:monospace;" name="intUniR" size="16" maxlength="16" value="" /> <input style="font-size:14pt" type="button" value="変換" onClick="change('UniR');" /></td>
+      </tr>
+    </table>
+  </form>
+</body>
+</html>
